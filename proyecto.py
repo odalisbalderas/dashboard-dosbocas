@@ -235,7 +235,7 @@ def color_total(val):
 st.dataframe(
     df_mec_fil.style
         .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
-        .applymap(color_total, subset=['Total_hrs']),
+       .map(color_total, subset=['Total_hrs']),
     use_container_width=True,
     hide_index=True,
     height=450,
