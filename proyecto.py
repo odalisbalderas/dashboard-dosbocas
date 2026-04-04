@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.graph_objects as go
 import openpyxl
 from datetime import datetime
+import requests
+import io
 
 st.set_page_config(
     page_title="Fuerza de Trabajo Notificada - C.C.C. Dos Bocas",
@@ -21,10 +23,25 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# ID del archivo en Google Drive
+FILE_ID = "1_IHIe0xIj3kmKgNG43a3k4cmACm5o7ob"
+DRIVE_URL = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
 
-@st.cache_data
-def load_data(uploaded_file):
-    wb = openpyxl.load_workbook(uploaded_file, data_only=True)
+
+@st.cache_data(ttl=300)  # refresca cada 5 minutos
+def load_data():
+    # Descargar el Excel desde Google Drive
+    session = requests.Session()
+    response = session.get(DRIVE_URL, stream=True)
+
+    # Google Drive a veces muestra una página de confirmación para archivos grandes
+    for key, value in response.cookies.items():
+        if key.startswith("download_warning"):
+            response = session.get(DRIVE_URL, params={"confirm": value}, stream=True)
+            break
+
+    excel_bytes = io.BytesIO(response.content)
+    wb = openpyxl.load_workbook(excel_bytes, data_only=True)
 
     # ── RESUMEN_OTS ──────────────────────────────────────────────────────────
     ws_res = wb['RESUMEN_OTS']
@@ -36,7 +53,6 @@ def load_data(uploaded_file):
     if isinstance(fecha_act, datetime):
         fecha_act = fecha_act.strftime('%d/%m/%Y')
 
-    # tabla fuerza de trabajo (filas 8-11, índices 7-10)
     dept_rows = rows_res[7:11]
     df_resumen = pd.DataFrame(
         [(r[1], r[2], r[3], r[4], r[5]) for r in dept_rows if r[1]],
@@ -44,7 +60,6 @@ def load_data(uploaded_file):
     )
     df_resumen['Cumplimiento_pct'] = (df_resumen['Cumplimiento'] * 100).round(2)
 
-    # totales (fila 13, índice 12)
     total_row = rows_res[12]
     totales = {
         'cumplimiento': total_row[2],
@@ -57,7 +72,6 @@ def load_data(uploaded_file):
     ws_mec = wb['MEC']
     rows_mec = list(ws_mec.iter_rows(values_only=True))
 
-    # Encabezados de fecha: fila 19 (índice 18), columnas F..AK (índices 6..36)
     header_row = rows_mec[18]
     date_headers = []
     for val in header_row[6:37]:
@@ -68,7 +82,6 @@ def load_data(uploaded_file):
         else:
             date_headers.append('')
 
-    # Personas: filas 20-69 (índices 19-68) — excluye vacantes y suplentes grupales
     people = []
     for r in rows_mec[19:70]:
         nombre = r[1]
@@ -90,21 +103,27 @@ def load_data(uploaded_file):
     return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers
 
 
-# ── SIDEBAR ──────────────────────────────────────────────────────────────────
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.header("📂 Archivo Excel")
-    uploaded = st.file_uploader("Sube tu reporte Excel", type=["xlsx"])
+    st.markdown("### 🏭 C.C.C. Dos Bocas")
+    st.caption("Fuerza de Trabajo Notificada")
     st.markdown("---")
-    st.caption("C.C.C. Dos Bocas · Fuerza de Trabajo")
+    if st.button("🔄 Actualizar datos"):
+        st.cache_data.clear()
+        st.rerun()
+    st.markdown("---")
+    st.caption("📂 Datos cargados desde Google Drive")
 
-if not uploaded:
-    st.info("👆 Sube el archivo Excel en el panel izquierdo para comenzar.")
+# ── CARGA DE DATOS ────────────────────────────────────────────────────────────
+try:
+    with st.spinner("Cargando datos desde Google Drive..."):
+        anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers = load_data()
+except Exception as e:
+    st.error(f"⚠️ No se pudo cargar el archivo desde Google Drive.\n\nVerifica que el archivo sea público.\n\nError: {e}")
     st.stop()
 
-anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers = load_data(uploaded)
-
 # ── ENCABEZADO ────────────────────────────────────────────────────────────────
-st.markdown(f'<div class="main-title">🏭 Resumen de Cumplimiento de Fuerza de Trabajo Notificada</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🏭 Resumen de Cumplimiento de Fuerza de Trabajo Notificada</div>', unsafe_allow_html=True)
 st.markdown(f'<div class="sub-title">C.C.C. Dos Bocas &nbsp;|&nbsp; Año: <b>{anio}</b> &nbsp;|&nbsp; Mes: <b>{mes}</b> &nbsp;|&nbsp; Actualizado al: <b>{fecha_act}</b></div>', unsafe_allow_html=True)
 
 # ── KPIs ─────────────────────────────────────────────────────────────────────
@@ -133,66 +152,37 @@ with k4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ── GRÁFICA PRINCIPAL (igual que en Excel) ───────────────────────────────────
+# ── GRÁFICA ───────────────────────────────────────────────────────────────────
 st.markdown('<div class="section-header">📊 Cumplimiento por Departamento</div>', unsafe_allow_html=True)
 
 fig = go.Figure()
-
 fig.add_trace(go.Bar(
-    name='Disponible',
-    x=df_resumen['Departamento'],
-    y=df_resumen['Disponible'],
-    marker_color='#2980b9',
-    text=df_resumen['Disponible'].apply(lambda v: f"{v:,.0f}"),
-    textposition='outside',
+    name='Disponible', x=df_resumen['Departamento'], y=df_resumen['Disponible'],
+    marker_color='#2980b9', text=df_resumen['Disponible'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
 ))
 fig.add_trace(go.Bar(
-    name='Planificado',
-    x=df_resumen['Departamento'],
-    y=df_resumen['Planificado'],
-    marker_color='#8e44ad',
-    text=df_resumen['Planificado'].apply(lambda v: f"{v:,.0f}"),
-    textposition='outside',
+    name='Planificado', x=df_resumen['Departamento'], y=df_resumen['Planificado'],
+    marker_color='#8e44ad', text=df_resumen['Planificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
 ))
 fig.add_trace(go.Bar(
-    name='Notificado',
-    x=df_resumen['Departamento'],
-    y=df_resumen['Notificado'],
-    marker_color='#27ae60',
-    text=df_resumen['Notificado'].apply(lambda v: f"{v:,.0f}"),
-    textposition='outside',
+    name='Notificado', x=df_resumen['Departamento'], y=df_resumen['Notificado'],
+    marker_color='#27ae60', text=df_resumen['Notificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
 ))
 fig.add_trace(go.Scatter(
-    name='Cumplimiento (%)',
-    x=df_resumen['Departamento'],
-    y=df_resumen['Cumplimiento_pct'],
-    mode='lines+markers+text',
-    yaxis='y2',
-    line=dict(color='#e74c3c', width=3),
-    marker=dict(size=10, color='#e74c3c'),
+    name='Cumplimiento (%)', x=df_resumen['Departamento'], y=df_resumen['Cumplimiento_pct'],
+    mode='lines+markers+text', yaxis='y2',
+    line=dict(color='#e74c3c', width=3), marker=dict(size=10, color='#e74c3c'),
     text=df_resumen['Cumplimiento_pct'].apply(lambda v: f"{v:.1f}%"),
-    textposition='top center',
-    textfont=dict(color='#e74c3c', size=12),
+    textposition='top center', textfont=dict(color='#e74c3c', size=12),
 ))
-
 fig.update_layout(
     barmode='group',
     yaxis=dict(title='Horas', gridcolor='#eee'),
-    yaxis2=dict(
-        title='Cumplimiento (%)',
-        overlaying='y',
-        side='right',
-        range=[0, 130],
-        ticksuffix='%',
-        gridcolor='#eee',
-        showgrid=False,
-    ),
+    yaxis2=dict(title='Cumplimiento (%)', overlaying='y', side='right',
+                range=[0, 130], ticksuffix='%', showgrid=False),
     legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
-    plot_bgcolor='white',
-    paper_bgcolor='white',
-    height=460,
-    margin=dict(t=40, b=20),
-    font=dict(family='Arial'),
+    plot_bgcolor='white', paper_bgcolor='white',
+    height=460, margin=dict(t=40, b=20), font=dict(family='Arial'),
 )
 st.plotly_chart(fig, use_container_width=True)
 
@@ -201,7 +191,6 @@ st.markdown('<div class="section-header">📋 Tabla Resumen – Hoja RESUMEN_OTS
 
 df_display = df_resumen[['Departamento', 'Disponible', 'Planificado', 'Notificado', 'Cumplimiento_pct']].copy()
 df_display.columns = ['Departamento', 'Disponible (Hrs)', 'Planificado (Hrs)', 'Notificado (Hrs)', 'Cumplimiento (%)']
-
 st.dataframe(
     df_display.style
         .format({'Disponible (Hrs)': '{:,.1f}', 'Planificado (Hrs)': '{:,.1f}',
