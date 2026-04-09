@@ -157,11 +157,11 @@ st.markdown('<div class="section-header"> Cumplimiento por Departamento</div>', 
 fig = go.Figure()
 fig.add_trace(go.Bar(
     name='Disponible', x=df_resumen['Departamento'], y=df_resumen['Disponible'],
-    marker_color='#2980b9', text=df_resumen['Disponible'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
+    marker_color='#29b978', text=df_resumen['Disponible'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
 ))
 fig.add_trace(go.Bar(
     name='Planificado', x=df_resumen['Departamento'], y=df_resumen['Planificado'],
-    marker_color='#8e44ad', text=df_resumen['Planificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
+    marker_color='#c3c7c5', text=df_resumen['Planificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
 ))
 fig.add_trace(go.Bar(
     name='Notificado', x=df_resumen['Departamento'], y=df_resumen['Notificado'],
