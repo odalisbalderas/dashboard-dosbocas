@@ -200,7 +200,7 @@ st.dataframe(
 )
 
 # ── TABLA MEC ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="section-header">🔧 Detalle de Horas Notificadas – Hoja MEC (Departamento Mecánico)</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja MEC (Departamento Mecánico)</div>', unsafe_allow_html=True)
 
 col_busq, col_cat = st.columns([2, 2])
 with col_busq:
