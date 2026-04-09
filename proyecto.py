@@ -161,11 +161,11 @@ fig.add_trace(go.Bar(
 ))
 fig.add_trace(go.Bar(
     name='Planificado', x=df_resumen['Departamento'], y=df_resumen['Planificado'],
-    marker_color='#c3c7c5', text=df_resumen['Planificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
+    marker_color='#635f65', text=df_resumen['Planificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
 ))
 fig.add_trace(go.Bar(
     name='Notificado', x=df_resumen['Departamento'], y=df_resumen['Notificado'],
-    marker_color='#27ae60', text=df_resumen['Notificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
+    marker_color='#c3c7c5', text=df_resumen['Notificado'].apply(lambda v: f"{v:,.0f}"), textposition='outside',
 ))
 fig.add_trace(go.Scatter(
     name='Cumplimiento (%)', x=df_resumen['Departamento'], y=df_resumen['Cumplimiento_pct'],
