@@ -8,7 +8,6 @@ import io
 
 st.set_page_config(
     page_title="Fuerza de Trabajo Notificada - C.C.C. Dos Bocas",
-    page_icon="🏭",
     layout="wide"
 )
 
@@ -105,25 +104,25 @@ def load_data():
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("### 🏭 C.C.C. Dos Bocas")
+    st.markdown("###  C.C.C. Dos Bocas")
     st.caption("Fuerza de Trabajo Notificada")
     st.markdown("---")
-    if st.button("🔄 Actualizar datos"):
+    if st.button(" Actualizar datos"):
         st.cache_data.clear()
         st.rerun()
     st.markdown("---")
-    st.caption("📂 Datos cargados desde Google Drive")
+    st.caption(" Datos cargados desde Google Drive")
 
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
     with st.spinner("Cargando datos desde Google Drive..."):
         anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers = load_data()
 except Exception as e:
-    st.error(f"⚠️ No se pudo cargar el archivo desde Google Drive.\n\nVerifica que el archivo sea público.\n\nError: {e}")
+    st.error(f" No se pudo cargar el archivo desde Google Drive.\n\nVerifica que el archivo sea público.\n\nError: {e}")
     st.stop()
 
 # ── ENCABEZADO ────────────────────────────────────────────────────────────────
-st.markdown('<div class="main-title">🏭 Resumen de Cumplimiento de Fuerza de Trabajo Notificada</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title"> Resumen de Cumplimiento de Fuerza de Trabajo Notificada</div>', unsafe_allow_html=True)
 st.markdown(f'<div class="sub-title">C.C.C. Dos Bocas &nbsp;|&nbsp; Año: <b>{anio}</b> &nbsp;|&nbsp; Mes: <b>{mes}</b> &nbsp;|&nbsp; Actualizado al: <b>{fecha_act}</b></div>', unsafe_allow_html=True)
 
 # ── KPIs ─────────────────────────────────────────────────────────────────────
@@ -153,7 +152,7 @@ with k4:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ── GRÁFICA ───────────────────────────────────────────────────────────────────
-st.markdown('<div class="section-header">📊 Cumplimiento por Departamento</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> Cumplimiento por Departamento</div>', unsafe_allow_html=True)
 
 fig = go.Figure()
 fig.add_trace(go.Bar(
@@ -187,7 +186,7 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 # ── TABLA RESUMEN ─────────────────────────────────────────────────────────────
-st.markdown('<div class="section-header">📋 Tabla Resumen – Hoja RESUMEN_OTS</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-header"> Tabla Resumen – Hoja RESUMEN_OTS</div>', unsafe_allow_html=True)
 
 df_display = df_resumen[['Departamento', 'Disponible', 'Planificado', 'Notificado', 'Cumplimiento_pct']].copy()
 df_display.columns = ['Departamento', 'Disponible (Hrs)', 'Planificado (Hrs)', 'Notificado (Hrs)', 'Cumplimiento (%)']
@@ -205,7 +204,7 @@ st.markdown('<div class="section-header">🔧 Detalle de Horas Notificadas – H
 
 col_busq, col_cat = st.columns([2, 2])
 with col_busq:
-    busqueda = st.text_input("🔍 Buscar nombre o RPE", "")
+    busqueda = st.text_input(" Buscar nombre o RPE", "")
 with col_cat:
     categorias = ['Todas'] + sorted(df_mec['Categoría'].dropna().unique().tolist())
     cat_sel = st.selectbox("Filtrar por categoría", categorias)
