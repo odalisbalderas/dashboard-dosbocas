@@ -112,6 +112,10 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
     st.caption(" Datos cargados desde Google Drive")
+    st.button ("MECANICO")
+    st.button ("ELECTRICO")
+    st.button ("INSTYCTRL")
+    st.button("CIVIL")
 
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
