@@ -111,11 +111,15 @@ with st.sidebar:
         st.cache_data.clear()
         st.rerun()
     st.markdown("---")
-    st.caption(" Datos cargados desde Google Drive")
+   
     st.button ("MECANICO")
     st.button ("ELECTRICO")
     st.button ("INSTYCTRL")
-    st.button("CIVIL")
+    st.button ("CIVIL")
+
+    st.selectbox("MES", ["ENERO", "FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE", "NOVIEMBRE","DICIEMBRE"])
+
+    st.caption(" Datos cargados desde Google Drive")
 
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
