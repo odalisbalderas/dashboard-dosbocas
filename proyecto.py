@@ -257,6 +257,9 @@ def color_total(val):
     except:
         return ''
     
+
+st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
+
 def tabla_mec():
         st.session_state.tabla = st.dataframe(
     df_mec_fil.style
@@ -267,9 +270,6 @@ def tabla_mec():
     height=450,
     )
 
-
-
-st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
