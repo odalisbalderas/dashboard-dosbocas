@@ -278,10 +278,10 @@ if st.session_state.ver_ele:
 
     col_busq, col_cat = st.columns([2, 2])
     with col_busq:
-        busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_mec")
+        busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_ele")
     with col_cat:
         categorias = ['Todas'] + sorted(df_ele['Categoría'].dropna().unique().tolist())
-        cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_mec")
+        cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_ele")
 
     df_ele_fil = df_ele.copy()
 
@@ -294,7 +294,7 @@ if st.session_state.ver_ele:
     if cat_sel != 'Todas':
         df_ele_fil = df_ele_fil[df_ele_fil['Categoría'] == cat_sel]
 
-    valid_dates = [d for d in date_headers if d]
+    valid_dates = [d for d in data_headers_ele if d]
     cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
     df_ele_fil = df_ele_fil[[c for c in cols_show if c in df_ele_fil.columns]]
 
@@ -323,9 +323,11 @@ if st.session_state.ver_ele:
 
 # ── FUNCIONES ──────────────────────────────────────────
 def activar_mec():
-    st.session_state.ver_mec = not st.session_state.ver_mec
+    st.session_state.ver_mec=True
+    st.session_state.ver_mec=False
 def activar_ele():
     st.session_state.ver_ele= True
+    st.session_state.ver_ele= False
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("C.C.C. Dos Bocas")
