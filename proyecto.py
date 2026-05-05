@@ -257,7 +257,7 @@ def color_total(val):
     except:
         return ''
     
-    def tabla_mec():
+def tabla_mec():
         st.session_state.tabla = st.dataframe(
     df_mec_fil.style
         .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
