@@ -228,39 +228,41 @@ st.dataframe(
 
 # ── TABLA MEC ─────────────────────────────────────────────────────────────────
 if st.session_state.ver_mec:
+
     st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja MEC (Departamento Mecánico)</div>', unsafe_allow_html=True)
 
-col_busq, col_cat = st.columns([2, 2])
-with col_busq:
-    busqueda = st.text_input(" Buscar nombre o RPE", "")
-with col_cat:
-    categorias = ['Todas'] + sorted(df_mec['Categoría'].dropna().unique().tolist())
-    cat_sel = st.selectbox("Filtrar por categoría", categorias)
+    col_busq, col_cat = st.columns([2, 2])
+    with col_busq:
+        busqueda = st.text_input(" Buscar nombre o RPE", "")
+    with col_cat:
+        categorias = ['Todas'] + sorted(df_mec['Categoría'].dropna().unique().tolist())
+        cat_sel = st.selectbox("Filtrar por categoría", categorias)
 
+    df_mec_fil = df_mec.copy()
 
-df_mec_fil = df_mec.copy()
-if busqueda:
-    df_mec_fil = df_mec_fil[
-        df_mec_fil['Nombre'].str.contains(busqueda, case=False, na=False) |
-        df_mec_fil['RPE'].astype(str).str.contains(busqueda, case=False, na=False)
-    ]
-if cat_sel != 'Todas':
-    df_mec_fil = df_mec_fil[df_mec_fil['Categoría'] == cat_sel]
+    if busqueda:
+        df_mec_fil = df_mec_fil[
+            df_mec_fil['Nombre'].str.contains(busqueda, case=False, na=False) |
+            df_mec_fil['RPE'].astype(str).str.contains(busqueda, case=False, na=False)
+        ]
 
-valid_dates = [d for d in date_headers if d]
-cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
-df_mec_fil = df_mec_fil[[c for c in cols_show if c in df_mec_fil.columns]]
+    if cat_sel != 'Todas':
+        df_mec_fil = df_mec_fil[df_mec_fil['Categoría'] == cat_sel]
 
-def color_total(val):
-    try:
-        v = float(val)
-        max_v = df_mec_fil['Total_hrs'].max() or 1
-        intensity = int(200 - (v / max_v) * 150)
-        return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
-    except:
-        return ''
+    valid_dates = [d for d in date_headers if d]
+    cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
+    df_mec_fil = df_mec_fil[[c for c in cols_show if c in df_mec_fil.columns]]
 
-st.dataframe(
+    def color_total(val):
+        try:
+            v = float(val)
+            max_v = df_mec_fil['Total_hrs'].max() or 1
+            intensity = int(200 - (v / max_v) * 150)
+            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
+        except:
+            return ''
+
+    st.dataframe(
         df_mec_fil.style
             .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
             .map(color_total, subset=['Total_hrs']),
@@ -269,7 +271,8 @@ st.dataframe(
         height=450,
     )
 
-st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
+    st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
+
 
 
 
