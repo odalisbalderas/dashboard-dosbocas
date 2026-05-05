@@ -101,7 +101,6 @@ def load_data():
 
     df_mec = pd.DataFrame(people)
 
-    return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers
     # ── ELECTRICO ──────────────────────────────────────────────────────────────────
     ws_ele = wb['ELE']
     rows_ele = list(ws_ele.iter_rows(values_only=True))
@@ -132,12 +131,9 @@ def load_data():
             **{date_headers[i]: horas[i] for i in range(len(date_headers)) if date_headers[i]}
         })
 
-    df_mec = pd.DataFrame(people)
+    df_ele = pd.DataFrame(people)
 
     return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers
-
-
-
 
 
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
