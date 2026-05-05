@@ -325,7 +325,7 @@ if st.session_state.ver_ele:
 def activar_mec():
     st.session_state.ver_mec = not st.session_state.ver_mec
 def activar_ele():
-    st.session_state.ver_mec= True
+    st.session_state.ver_ele= True
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("C.C.C. Dos Bocas")
