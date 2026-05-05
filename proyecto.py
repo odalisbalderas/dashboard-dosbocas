@@ -136,33 +136,7 @@ def load_data():
 
 
 
-# ── SIDEBAR ───────────────────────────────────────────────────────────────────
-with st.sidebar:
-    st.markdown("C.C.C. Dos Bocas")
-    st.caption("Fuerza de Trabajo Notificada")
 
-    def tabla_mec():
-        st.session_state.tabla = st.dataframe(
-    df_mec_fil.style
-        .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
-       .map(color_total, subset=['Total_hrs']),
-    use_container_width=True,
-    hide_index=True,
-    height=450,
-    )
-    st.button ("MECANICO",on_click=tabla_mec)
-    st.button ("ELECTRICO")
-    st.button ("INSTYCTRL")
-    st.button ("CIVIL")
-
-    st.selectbox("MES", ["ENERO", "FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE", "NOVIEMBRE","DICIEMBRE"])
-    
-    st.markdown("---")
-    if st.button(" Actualizar datos"):
-        st.cache_data.clear()
-        st.rerun()
-    st.markdown("---")
-    st.caption(" Datos cargados desde Google Drive")
 
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
@@ -282,7 +256,37 @@ def color_total(val):
         return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
     except:
         return ''
+    
+    def tabla_mec():
+        st.session_state.tabla = st.dataframe(
+    df_mec_fil.style
+        .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
+       .map(color_total, subset=['Total_hrs']),
+    use_container_width=True,
+    hide_index=True,
+    height=450,
+    )
 
 
 
 st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
+
+# ── SIDEBAR ───────────────────────────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("C.C.C. Dos Bocas")
+    st.caption("Fuerza de Trabajo Notificada")
+
+    st.button ("MECANICO",on_click=tabla_mec)
+    st.button ("ELECTRICO")
+    st.button ("INSTYCTRL")
+    st.button ("CIVIL")
+
+    st.selectbox("MES", ["ENERO", "FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE", "NOVIEMBRE","DICIEMBRE"])
+    
+    st.markdown("---")
+    if st.button(" Actualizar datos"):
+        st.cache_data.clear()
+        st.rerun()
+    st.markdown("---")
+    st.caption(" Datos cargados desde Google Drive")
+
