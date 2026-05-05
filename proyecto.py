@@ -111,14 +111,16 @@ def load_data():
     date_headers_ele = []
     for val in header_row[6:37]:
         if isinstance(val, datetime):
-            date_headers.append(val.strftime('%d/%m'))
+            date_headers_ele.append(val.strftime('%d/%m'))
         elif val:
-            date_headers.append(str(val))
+            date_headers_ele.append(str(val))
         else:
-            date_headers.append('')
+            date_headers_ele.append('')
 
     people = []
-    for r in rows_ele[19:70]:
+    for r in rows_ele[19:]:
+        if not r or len(r) < 7:
+            continue
         nombre = r[1]
         rpe    = r[4]
         categ  = r[5]
@@ -130,12 +132,12 @@ def load_data():
             'RPE':       rpe or '',
             'Categoría': categ or '',
             'Total_hrs': sum(horas),
-            **{date_headers[i]: horas[i] for i in range(len(date_headers)) if date_headers[i]}
+            **{date_headers[i]: horas[i] for i in range(len(date_headers_ele)) if date_headers_ele[i]}
         })
 
     df_ele = pd.DataFrame(people)
 
-    return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, date_headers_ele
+    return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, date_headers_ele 
 
 
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
@@ -326,8 +328,8 @@ def activar_mec():
     st.session_state.ver_mec=True
     st.session_state.ver_mec=False
 def activar_ele():
-    st.session_state.ver_ele= True
-    st.session_state.ver_ele= False
+    st.session_state.ver_ele= not st.session_state.ver_ele
+    
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("C.C.C. Dos Bocas")
