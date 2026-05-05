@@ -141,8 +141,8 @@ with st.sidebar:
     st.markdown("C.C.C. Dos Bocas")
     st.caption("Fuerza de Trabajo Notificada")
 
-   def tabla_mec():
-    st.session_state.tabla = st.dataframe(
+    def tabla_mec():
+        st.session_state.tabla = st.dataframe(
     df_mec_fil.style
         .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
        .map(color_total, subset=['Total_hrs']),
