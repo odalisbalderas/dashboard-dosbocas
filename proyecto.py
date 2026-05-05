@@ -100,25 +100,60 @@ def load_data():
     df_mec = pd.DataFrame(people)
 
     return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers
+    # ── ELECTRICO ──────────────────────────────────────────────────────────────────
+    ws_ele = wb['ELE']
+    rows_ele = list(ws_ele.iter_rows(values_only=True))
+
+    header_row = rows_ele[18]
+    date_headers = []
+    for val in header_row[6:37]:
+        if isinstance(val, datetime):
+            date_headers.append(val.strftime('%d/%m'))
+        elif val:
+            date_headers.append(str(val))
+        else:
+            date_headers.append('')
+
+    people = []
+    for r in rows_ele[19:70]:
+        nombre = r[1]
+        rpe    = r[4]
+        categ  = r[5]
+        if not nombre or str(nombre).startswith('   SUPLENTES') or nombre == 'VACANTE':
+            continue
+        horas = [v if isinstance(v, (int, float)) else 0 for v in r[6:37]]
+        people.append({
+            'Nombre':    nombre,
+            'RPE':       rpe or '',
+            'Categoría': categ or '',
+            'Total_hrs': sum(horas),
+            **{date_headers[i]: horas[i] for i in range(len(date_headers)) if date_headers[i]}
+        })
+
+    df_mec = pd.DataFrame(people)
+
+    return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers
+
 
 
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("###  C.C.C. Dos Bocas")
+    st.markdown("C.C.C. Dos Bocas")
     st.caption("Fuerza de Trabajo Notificada")
-    st.markdown("---")
-    if st.button(" Actualizar datos"):
-        st.cache_data.clear()
-        st.rerun()
-    st.markdown("---")
+
    
-    st.button ("MECANICO")
+    st.button ("MECANICO",on_click=tabla_mec)
     st.button ("ELECTRICO")
     st.button ("INSTYCTRL")
     st.button ("CIVIL")
 
     st.selectbox("MES", ["ENERO", "FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE", "NOVIEMBRE","DICIEMBRE"])
-
+    
+    st.markdown("---")
+    if st.button(" Actualizar datos"):
+        st.cache_data.clear()
+        st.rerun()
+    st.markdown("---")
     st.caption(" Datos cargados desde Google Drive")
 
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
@@ -217,6 +252,7 @@ with col_cat:
     categorias = ['Todas'] + sorted(df_mec['Categoría'].dropna().unique().tolist())
     cat_sel = st.selectbox("Filtrar por categoría", categorias)
 
+
 df_mec_fil = df_mec.copy()
 if busqueda:
     df_mec_fil = df_mec_fil[
@@ -239,13 +275,14 @@ def color_total(val):
     except:
         return ''
 
-st.dataframe(
+def tabla_mec():
+    st.session_state.tabla = st.dataframe(
     df_mec_fil.style
         .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
        .map(color_total, subset=['Total_hrs']),
     use_container_width=True,
     hide_index=True,
     height=450,
-)
+    )
 
 st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
