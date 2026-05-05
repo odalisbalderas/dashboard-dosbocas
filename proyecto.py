@@ -227,7 +227,8 @@ st.dataframe(
 )
 
 # ── TABLA MEC ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja MEC (Departamento Mecánico)</div>', unsafe_allow_html=True)
+if st.session_state.ver_mec:
+    st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja MEC (Departamento Mecánico)</div>', unsafe_allow_html=True)
 
 col_busq, col_cat = st.columns([2, 2])
 with col_busq:
@@ -258,11 +259,8 @@ def color_total(val):
         return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
     except:
         return ''
-    
 
-st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
-if st.session_state.ver_mec:
-    st.dataframe(
+st.dataframe(
         df_mec_fil.style
             .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
             .map(color_total, subset=['Total_hrs']),
@@ -270,6 +268,9 @@ if st.session_state.ver_mec:
         hide_index=True,
         height=450,
     )
+
+st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
+
 
 
 # ── FUNCIONES ──────────────────────────────────────────
