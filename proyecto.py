@@ -141,7 +141,15 @@ with st.sidebar:
     st.markdown("C.C.C. Dos Bocas")
     st.caption("Fuerza de Trabajo Notificada")
 
-   
+   def tabla_mec():
+    st.session_state.tabla = st.dataframe(
+    df_mec_fil.style
+        .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
+       .map(color_total, subset=['Total_hrs']),
+    use_container_width=True,
+    hide_index=True,
+    height=450,
+    )
     st.button ("MECANICO",on_click=tabla_mec)
     st.button ("ELECTRICO")
     st.button ("INSTYCTRL")
@@ -275,14 +283,6 @@ def color_total(val):
     except:
         return ''
 
-def tabla_mec():
-    st.session_state.tabla = st.dataframe(
-    df_mec_fil.style
-        .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
-       .map(color_total, subset=['Total_hrs']),
-    use_container_width=True,
-    hide_index=True,
-    height=450,
-    )
+
 
 st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
