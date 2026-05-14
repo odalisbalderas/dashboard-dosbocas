@@ -30,6 +30,74 @@ st.markdown("""
 FILE_ID = "1_IHIe0xIj3kmKgNG43a3k4cmACm5o7ob"
 DRIVE_URL = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
 
+def leer_hoja_trabajadores(wb, nombre_hoja):
+    ws = wb[nombre_hoja]
+    rows = list(ws.iter_rows(values_only=True))
+
+    # 🔍 1. Detectar encabezado (donde empiezan las fechas)
+    header_idx = None
+    for i, row in enumerate(rows):
+        if row and any(isinstance(c, datetime) for c in row):
+            header_idx = i
+            break
+
+    if header_idx is None:
+        raise ValueError(f"No se encontró encabezado en hoja {nombre_hoja}")
+
+    header_row = rows[header_idx]
+
+    # 📅 2. Detectar columnas de fechas automáticamente
+    date_headers = []
+    start_col = None
+
+    for i, val in enumerate(header_row):
+        if isinstance(val, datetime):
+            start_col = i
+            break
+
+    for val in header_row[start_col:]:
+        if isinstance(val, datetime):
+            date_headers.append(val.strftime('%d/%m'))
+        elif val:
+            date_headers.append(str(val))
+        else:
+            break  # 🔥 se detiene cuando ya no hay fechas
+
+    # 👤 3. Leer personas
+    people = []
+    for r in rows[header_idx + 1:]:
+        if not r or len(r) < start_col:
+            continue
+
+        nombre = r[1]
+        rpe    = r[4] if len(r) > 4 else ''
+        categ  = r[5] if len(r) > 5 else ''
+
+        # filtros
+        if not nombre or str(nombre).startswith('   SUPLENTES') or nombre == 'VACANTE':
+            continue
+
+        # 🧮 horas dinámicas
+        horas = [
+            v if isinstance(v, (int, float)) else 0
+            for v in r[start_col:start_col + len(date_headers)]
+        ]
+
+        people.append({
+            'Nombre': nombre,
+            'RPE': rpe or '',
+            'Categoría': categ or '',
+            'Total_hrs': sum(horas),
+            **{
+                date_headers[i]: horas[i]
+                for i in range(len(date_headers))
+            }
+        })
+
+    df = pd.DataFrame(people)
+
+    return df, date_headers
+
 
 @st.cache_data(ttl=300)  # refresca cada 5 minutos
 def load_data():
@@ -72,74 +140,22 @@ def load_data():
     }
 
     # ── MEC ──────────────────────────────────────────────────────────────────
-    ws_mec = wb['MEC']
-    rows_mec = list(ws_mec.iter_rows(values_only=True))
-
-    header_row = rows_mec[18]
-    date_headers = []
-    for val in header_row[6:37]:
-        if isinstance(val, datetime):
-            date_headers.append(val.strftime('%d/%m'))
-        elif val:
-            date_headers.append(str(val))
-        else:
-            date_headers.append('')
-
-    people = []
-    for r in rows_mec[19:70]:
-        nombre = r[1]
-        rpe    = r[4]
-        categ  = r[5]
-        if not nombre or str(nombre).startswith('   SUPLENTES') or nombre == 'VACANTE':
-            continue
-        horas = [v if isinstance(v, (int, float)) else 0 for v in r[6:37]]
-        people.append({
-            'Nombre':    nombre,
-            'RPE':       rpe or '',
-            'Categoría': categ or '',
-            'Total_hrs': sum(horas),
-            **{date_headers[i]: horas[i] for i in range(len(date_headers)) if date_headers[i]}
-        })
-
-    df_mec = pd.DataFrame(people)
+    df_mec, date_headers = leer_hoja_trabajadores(wb, 'MEC')
 
     # ── ELECTRICO ──────────────────────────────────────────────────────────────────
-    ws_ele = wb['ELE']
-    rows_ele = list(ws_ele.iter_rows(values_only=True))
+    df_ele, date_headers_ele = leer_hoja_trabajadores(wb, 'ELE')
 
-    header_row = rows_ele[18]
-    date_headers_ele = []
-    for val in header_row[6:37]:
-        if isinstance(val, datetime):
-            date_headers_ele.append(val.strftime('%d/%m'))
-        elif val:
-            date_headers_ele.append(str(val))
-        else:
-            date_headers_ele.append('')
-
-    people = []
-    for r in rows_ele[19:]:
-        if not r or len(r) < 7:
-            continue
-        nombre = r[1]
-        rpe    = r[4]
-        categ  = r[5]
-        if not nombre or str(nombre).startswith('   SUPLENTES') or nombre == 'VACANTE':
-            continue
-        horas = [v if isinstance(v, (int, float)) else 0 for v in r[6:37]]
-        people.append({
-            'Nombre':    nombre,
-            'RPE':       rpe or '',
-            'Categoría': categ or '',
-            'Total_hrs': sum(horas),
-            **{date_headers[i]: horas[i] for i in range(len(date_headers_ele)) if date_headers_ele[i]}
-        })
-
-    df_ele = pd.DataFrame(people)
-
-    return anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, date_headers_ele 
-
-
+    return (
+        anio,
+        mes,
+        fecha_act,
+        df_resumen,
+        totales,
+        df_mec,
+        date_headers,
+        df_ele,
+        date_headers_ele
+    )
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
     with st.spinner("Cargando datos desde Google Drive..."):
