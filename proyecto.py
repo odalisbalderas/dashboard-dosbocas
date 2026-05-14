@@ -16,7 +16,7 @@ if "ver_mec" not in st.session_state:
 if "ver_ele" not in st.session_state:
     st.session_state.ver_ele = False
 if "ver_instyctrl" not in st.session_state:
-    st.session_state.ver_instctrl = False
+    st.session_state.ver_instyctrl = False
 st.markdown("""
 <style>
     .main-title { font-size: 26px; font-weight: bold; color: #1a3a5c; margin-bottom: 4px; }
