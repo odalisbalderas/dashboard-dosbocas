@@ -69,47 +69,36 @@ def leer_hoja_trabajadores(wb, nombre_hoja):
         else:
             break  # 🔥 se detiene cuando ya no hay fechas
 
-   # 👤 3. Detectar columnas automáticamente
-    headers_text = [
-    str(c).strip().upper() if c else ''
-    for c in header_row
-    ]
-
-    col_nombre = headers_text.index('NOMBRE')
-    col_rpe = headers_text.index('RPE')
-    col_categ = headers_text.index('CATEGORIA')
-
-    # 👤 4. Leer personas
+    # 👤 3. Leer personas
     people = []
-
     for r in rows[header_idx + 1:]:
         if not r or len(r) < start_col:
-         continue
+            continue
 
-        nombre = r[col_nombre] if len(r) > col_nombre else ''
-        rpe    = r[col_rpe] if len(r) > col_rpe else ''
-        categ  = r[col_categ] if len(r) > col_categ else ''
+        nombre = r[1]
+        rpe    = r[4] if len(r) > 4 else ''
+        categ  = r[5] if len(r) > 5 else ''
 
-    # filtros
+        # filtros
         if not nombre or str(nombre).startswith('   SUPLENTES') or nombre == 'VACANTE':
-         continue
+            continue
 
-    # 🧮 horas dinámicas
-    horas = [
-        v if isinstance(v, (int, float)) else 0
-        for v in r[start_col:start_col + len(date_headers)]
-    ]
+        # 🧮 horas dinámicas
+        horas = [
+            v if isinstance(v, (int, float)) else 0
+            for v in r[start_col:start_col + len(date_headers)]
+        ]
 
-    people.append({
-        'Nombre': nombre,
-        'RPE': rpe or '',
-        'Categoría': categ or '',
-        'Total_hrs': sum(horas),
-        **{
-            date_headers[i]: horas[i]
-            for i in range(len(date_headers))
-        }
-    })
+        people.append({
+            'Nombre': nombre,
+            'RPE': rpe or '',
+            'Categoría': categ or '',
+            'Total_hrs': sum(horas),
+            **{
+                date_headers[i]: horas[i]
+                for i in range(len(date_headers))
+            }
+        })
 
     df = pd.DataFrame(people)
 
@@ -377,13 +366,7 @@ if st.session_state.ver_civ:
     with col_busq:
         busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_civ")
     with col_cat:
-        categorias = ['Todas'] + sorted(
-            df_civ['Categoría']
-            .dropna()
-            .astype(str)
-            .unique()
-            .tolist()
-        )
+        categorias = ['Todas'] + sorted(df_civ['Categoría'].dropna().unique().tolist())
         cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_civ")
 
     df_civ_fil = df_civ.copy()
@@ -436,4 +419,3 @@ with st.sidebar:
         st.rerun()
     st.markdown("---")
     st.caption(" Datos cargados desde Google Drive")
-
