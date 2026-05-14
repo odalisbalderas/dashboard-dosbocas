@@ -146,7 +146,7 @@ def load_data():
     # ── ELECTRICO ──────────────────────────────────────────────────────────────────
     df_ele, date_headers_ele = leer_hoja_trabajadores(wb, 'ELE')
     # INSTYCTRL_______________________________________________________________________
-    df_instyctrl, date_headers_instyctrl = leer_hoja_trabajadores(wb, 'INSTYCTRL')
+    df_instyctrl, date_headers_instyctrl = leer_hoja_trabajadores(wb, 'IYC')
 
     return (
         anio,
@@ -335,14 +335,14 @@ if st.session_state.ver_ele:
     # ── TABLA INSTYCTRL ─────────────────────────────────────────────────────────────────
 if st.session_state.ver_instyctrl:
 
-    st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja ELE (Departamento Electrico)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja INSTYCTRL (Departamento Inst y Ctrl)</div>', unsafe_allow_html=True)
 
     col_busq, col_cat = st.columns([2, 2])
     with col_busq:
-        busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_ele")
+        busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_instyctrl")
     with col_cat:
         categorias = ['Todas'] + sorted(df_instyctrl['Categoría'].dropna().unique().tolist())
-        cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_ele")
+        cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_instyctrl")
 
     df_instyctrl_fil = df_instyctrl.copy()
 
@@ -355,7 +355,7 @@ if st.session_state.ver_instyctrl:
     if cat_sel != 'Todas':
         df_instyctrl_fil = df_instyctrl_fil[df_instyctrl_fil['Categoría'] == cat_sel]
 
-    valid_dates = [d for d in data_headers_ele if d]
+    valid_dates = [d for d in data_headers_instyctrl if d]
     cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
     df_instyctrl_fil = df_instyctrl_fil[[c for c in cols_show if c in df_instyctrl_fil.columns]]
 
