@@ -164,7 +164,7 @@ def load_data():
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
     with st.spinner("Cargando datos desde Google Drive..."):
-        anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, data_headers_ele, df_instyctrl, date_headers_instyctrl = load_data()
+        anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, data_headers_ele, df_instyctrl, data_headers_instyctrl = load_data()
 except Exception as e:
     st.error(f" No se pudo cargar el archivo desde Google Drive.\n\nVerifica que el archivo sea público.\n\nError: {e}")
     st.stop()
