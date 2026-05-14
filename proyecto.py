@@ -31,6 +31,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
+
 # ID del archivo en Google Drive
 FILE_ID = "1_IHIe0xIj3kmKgNG43a3k4cmACm5o7ob"
 DRIVE_URL = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
@@ -101,7 +103,14 @@ def leer_hoja_trabajadores(wb, nombre_hoja):
     df = pd.DataFrame(people)
 
     return df, date_headers
-
+    def color_total(val):
+        try:
+            v = float(val)
+            max_v = df_civ_fil['Total_hrs'].max() or 1
+            intensity = int(200 - (v / max_v) * 150)
+            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
+        except:
+            return ''
 
 @st.cache_data(ttl=300)  # refresca cada 5 minutos
 def load_data():
@@ -279,14 +288,6 @@ if st.session_state.ver_mec:
     cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
     df_mec_fil = df_mec_fil[[c for c in cols_show if c in df_mec_fil.columns]]
 
-    def color_total(val):
-        try:
-            v = float(val)
-            max_v = df_mec_fil['Total_hrs'].max() or 1
-            intensity = int(200 - (v / max_v) * 150)
-            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
-        except:
-            return ''
 
     st.dataframe(df_mec_fil, use_container_width=True)
 
@@ -319,14 +320,6 @@ if st.session_state.ver_ele:
     cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
     df_ele_fil = df_ele_fil[[c for c in cols_show if c in df_ele_fil.columns]]
 
-    def color_total(val):
-        try:
-            v = float(val)
-            max_v = df_ele_fil['Total_hrs'].max() or 1
-            intensity = int(200 - (v / max_v) * 150)
-            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
-        except:
-            return ''
 
     st.dataframe(df_ele_fil, use_container_width=True)
 
@@ -359,14 +352,6 @@ if st.session_state.ver_instyctrl:
     cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
     df_instyctrl_fil = df_instyctrl_fil[[c for c in cols_show if c in df_instyctrl_fil.columns]]
 
-    def color_total(val):
-        try:
-            v = float(val)
-            max_v = df_instyctrl_fil['Total_hrs'].max() or 1
-            intensity = int(200 - (v / max_v) * 150)
-            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
-        except:
-            return ''
 
     st.dataframe(df_instyctrl_fil, use_container_width=True)
 
@@ -397,16 +382,8 @@ if st.session_state.ver_civ:
 
     valid_dates = [d for d in data_headers_civ if d]
     cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
-    df_civ = df_civ_fil[[c for c in cols_show if c in df_civ_fil.columns]]
+    df_civ_fil = df_civ_fil[[c for c in cols_show if c in df_civ_fil.columns]]
 
-    def color_total(val):
-        try:
-            v = float(val)
-            max_v = df_civ_fil['Total_hrs'].max() or 1
-            intensity = int(200 - (v / max_v) * 150)
-            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
-        except:
-            return ''
 
     st.dataframe(df_civ_fil, use_container_width=True)
 
