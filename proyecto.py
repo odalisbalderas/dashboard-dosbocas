@@ -239,7 +239,9 @@ st.markdown('<div class="section-header"> Tabla Resumen – Hoja RESUMEN_OTS</di
 df_display = df_resumen[['Departamento', 'Disponible', 'Planificado', 'Notificado', 'Cumplimiento_pct']].copy()
 df_display.columns = ['Departamento', 'Disponible (Hrs)', 'Planificado (Hrs)', 'Notificado (Hrs)', 'Cumplimiento (%)']
 st.dataframe(
-    df_fil,
+    df_display.style
+        .format(...)
+        .map(color_total, subset=['Total_hrs']),
     use_container_width=True,
     hide_index=True,
     height=450,
@@ -281,7 +283,7 @@ if st.session_state.ver_mec:
         except:
             return ''
 
-    st.dataframe(df_fil, use_container_width=True)
+    st.dataframe(df_mec_fil, use_container_width=True)
 
     st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
 
@@ -321,14 +323,7 @@ if st.session_state.ver_ele:
         except:
             return ''
 
-    st.dataframe(
-        df_ele_fil.style
-            .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_ele_fil.columns}})
-            .map(color_total, subset=['Total_hrs']),
-        use_container_width=True,
-        hide_index=True,
-        height=450,
-    )
+    st.dataframe(df_ele_fil, use_container_width=True)
 
     st.caption(f"Mostrando {len(df_ele_fil)} de {len(df_ele)} personas")
 
@@ -368,14 +363,7 @@ if st.session_state.ver_instyctrl:
         except:
             return ''
 
-    st.dataframe(
-        df_instyctrl_fil.style
-            .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_ele_fil.columns}})
-            .map(color_total, subset=['Total_hrs']),
-        use_container_width=True,
-        hide_index=True,
-        height=450,
-    )
+    st.dataframe(df_instyctrl_fil, use_container_width=True)
 
     st.caption(f"Mostrando {len(df_instyctrl_fil)} de {len(df_instyctrl)} personas")
 
