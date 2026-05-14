@@ -15,6 +15,8 @@ if "ver_mec" not in st.session_state:
     st.session_state.ver_mec = False
 if "ver_ele" not in st.session_state:
     st.session_state.ver_ele = False
+if "ver_instyctrl" not in st.session_state:
+    st.session_state.ver_instctrl = False
 st.markdown("""
 <style>
     .main-title { font-size: 26px; font-weight: bold; color: #1a3a5c; margin-bottom: 4px; }
@@ -143,6 +145,8 @@ def load_data():
 
     # ── ELECTRICO ──────────────────────────────────────────────────────────────────
     df_ele, date_headers_ele = leer_hoja_trabajadores(wb, 'ELE')
+    # INSTYCTRL_______________________________________________________________________
+    df_instyctrl, date_headers_instyctrl = leer_hoja_trabajadores(wb, 'INSTYCTRL')
 
     return (
         anio,
@@ -153,12 +157,14 @@ def load_data():
         df_mec,
         date_headers,
         df_ele,
-        date_headers_ele
+        date_headers_ele,
+        df_instyctrl,
+        date_headers_instyctrl
     )
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
     with st.spinner("Cargando datos desde Google Drive..."):
-        anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, data_headers_ele = load_data()
+        anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, data_headers_ele, df_instyctrl, date_headers_instyctrl = load_data()
 except Exception as e:
     st.error(f" No se pudo cargar el archivo desde Google Drive.\n\nVerifica que el archivo sea público.\n\nError: {e}")
     st.stop()
@@ -326,6 +332,53 @@ if st.session_state.ver_ele:
 
     st.caption(f"Mostrando {len(df_ele_fil)} de {len(df_ele)} personas")
 
+    # ── TABLA INSTYCTRL ─────────────────────────────────────────────────────────────────
+if st.session_state.ver_ele:
+
+    st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja ELE (Departamento Electrico)</div>', unsafe_allow_html=True)
+
+    col_busq, col_cat = st.columns([2, 2])
+    with col_busq:
+        busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_ele")
+    with col_cat:
+        categorias = ['Todas'] + sorted(df_instyctrl['Categoría'].dropna().unique().tolist())
+        cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_ele")
+
+    df_instyctrl_fil = df_instyctrl.copy()
+
+    if busqueda:
+        df_instyctrl_fil = df_instyctrl_fil[
+            df_instyctrl_fil['Nombre'].str.contains(busqueda, case=False, na=False) |
+            df_instyctrl_fil['RPE'].astype(str).str.contains(busqueda, case=False, na=False)
+        ]
+
+    if cat_sel != 'Todas':
+        df_instyctrl_fil = df_instyctrl_fil[df_instyctrl_fil['Categoría'] == cat_sel]
+
+    valid_dates = [d for d in data_headers_ele if d]
+    cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
+    df_instyctrl_fil = df_instyctrl_fil[[c for c in cols_show if c in df_instyctrl_fil.columns]]
+
+    def color_total(val):
+        try:
+            v = float(val)
+            max_v = df_instyctrl_fil['Total_hrs'].max() or 1
+            intensity = int(200 - (v / max_v) * 150)
+            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
+        except:
+            return ''
+
+    st.dataframe(
+        df_instyctrl_fil.style
+            .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_ele_fil.columns}})
+            .map(color_total, subset=['Total_hrs']),
+        use_container_width=True,
+        hide_index=True,
+        height=450,
+    )
+
+    st.caption(f"Mostrando {len(df_instyctrl_fil)} de {len(df_instyctrl)} personas")
+
 
 
 
@@ -334,6 +387,8 @@ def activar_mec():
     st.session_state.ver_mec= not st.session_state.ver_mec
 def activar_ele():
     st.session_state.ver_ele= not st.session_state.ver_ele  
+def activar_instyctrl():
+    st.session_state.ver_instyctrl= not st.session_state.ver_instyctrl
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("C.C.C. Dos Bocas")
@@ -343,7 +398,7 @@ with st.sidebar:
     st.selectbox("MES", ["ENERO", "FEBRERO","MARZO","ABRIL","MAYO","JUNIO","JULIO","AGOSTO","SEPTIEMBRE","OCTUBRE", "NOVIEMBRE","DICIEMBRE"])
     st.button ("MECANICO",on_click=activar_mec)
     st.button ("ELECTRICO",on_click=activar_ele)
-    st.button ("INSTYCTRL")
+    st.button ("INSTYCTRL", on_click=activar_instyctrl)
     st.button ("CIVIL")
     st.markdown("---")
 
