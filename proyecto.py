@@ -239,16 +239,7 @@ st.markdown('<div class="section-header"> Tabla Resumen – Hoja RESUMEN_OTS</di
 df_display = df_resumen[['Departamento', 'Disponible', 'Planificado', 'Notificado', 'Cumplimiento_pct']].copy()
 df_display.columns = ['Departamento', 'Disponible (Hrs)', 'Planificado (Hrs)', 'Notificado (Hrs)', 'Cumplimiento (%)']
 st.dataframe(
-    df_fil.style # type: ignore
-        .format({
-            'Total_hrs': '{:.1f}',
-            **{
-                d: '{:.1f}'
-                for d in fechas
-                if d in df_fil.columns
-            }
-        })
-        .map(color_total, subset=['Total_hrs']),
+    df_fil,
     use_container_width=True,
     hide_index=True,
     height=450,
