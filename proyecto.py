@@ -234,12 +234,10 @@ st.markdown('<div class="section-header"> Tabla Resumen – Hoja RESUMEN_OTS</di
 df_display = df_resumen[['Departamento', 'Disponible', 'Planificado', 'Notificado', 'Cumplimiento_pct']].copy()
 df_display.columns = ['Departamento', 'Disponible (Hrs)', 'Planificado (Hrs)', 'Notificado (Hrs)', 'Cumplimiento (%)']
 st.dataframe(
-    df_display.style
-        .format({'Disponible (Hrs)': '{:,.1f}', 'Planificado (Hrs)': '{:,.1f}',
-                 'Notificado (Hrs)': '{:,.1f}', 'Cumplimiento (%)': '{:.1f}%'})
-        .bar(subset=['Cumplimiento (%)'], color='#a8d8a8', vmin=0, vmax=100),
+    df_fil,
     use_container_width=True,
     hide_index=True,
+    height=450,
 )
 
 # ── TABLA MEC ─────────────────────────────────────────────────────────────────
@@ -339,7 +337,7 @@ if st.session_state.ver_ele:
 
 
 
-# ── FUNCIONES ──────────────────────────────────────────
+# ── FUNCIONES DE BOTONES ──────────────────────────────────────────
 def activar_mec():
     st.session_state.ver_mec= not st.session_state.ver_mec
 def activar_ele():
