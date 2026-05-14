@@ -32,8 +32,7 @@ DRIVE_URL = f"https://drive.google.com/uc?export=download&id={FILE_ID}"
 
 def leer_hoja_trabajadores(wb, nombre_hoja):
     ws = wb[nombre_hoja]
-    rows = list(ws.iter_rows(values_only=True))
-
+    rows = list(ws.iter_rows(min_row=1, max_row=100, values_only=True))
     # 🔍 1. Detectar encabezado (donde empiezan las fechas)
     header_idx = None
     for i, row in enumerate(rows):
@@ -276,14 +275,7 @@ if st.session_state.ver_mec:
         except:
             return ''
 
-    st.dataframe(
-        df_mec_fil.style
-            .format({'Total_hrs': '{:.1f}', **{d: '{:.1f}' for d in valid_dates if d in df_mec_fil.columns}})
-            .map(color_total, subset=['Total_hrs']),
-        use_container_width=True,
-        hide_index=True,
-        height=450,
-    )
+    st.dataframe(df_fil, use_container_width=True)
 
     st.caption(f"Mostrando {len(df_mec_fil)} de {len(df_mec)} personas")
 
