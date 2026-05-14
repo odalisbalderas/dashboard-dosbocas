@@ -357,7 +357,7 @@ if st.session_state.ver_instyctrl:
 
     st.caption(f"Mostrando {len(df_instyctrl_fil)} de {len(df_instyctrl)} personas")
 
-    # ── TABLA CIV ─────────────────────────────────────────────────────────────────
+    # ── TABLA CIV ────────────────────────────────────────────────────────────────
 if st.session_state.ver_civ:
 
     st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja civ (Departamento civ)</div>', unsafe_allow_html=True)
