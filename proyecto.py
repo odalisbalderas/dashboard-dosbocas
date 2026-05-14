@@ -333,7 +333,7 @@ if st.session_state.ver_ele:
     st.caption(f"Mostrando {len(df_ele_fil)} de {len(df_ele)} personas")
 
     # ── TABLA INSTYCTRL ─────────────────────────────────────────────────────────────────
-if st.session_state.ver_ele:
+if st.session_state.ver_instyctrl:
 
     st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja ELE (Departamento Electrico)</div>', unsafe_allow_html=True)
 
