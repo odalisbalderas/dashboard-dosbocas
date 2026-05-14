@@ -366,13 +366,7 @@ if st.session_state.ver_civ:
     with col_busq:
         busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_civ")
     with col_cat:
-        categorias = ['Todas'] + sorted(
-        df_civ['Categoría']
-        .dropna()
-        .astype(str)
-        .unique()
-        .tolist()
-)
+        categorias = ['Todas'] + sorted(df_ele['Categoría'].dropna().unique().tolist())
         cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_civ")
 
     df_civ_fil = df_civ.copy()
