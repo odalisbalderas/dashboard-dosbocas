@@ -66,6 +66,7 @@ def leer_hoja_trabajadores(wb, nombre_hoja):
 
     # 👤 3. Leer personas
     people = []
+    header_idx = 1
     for r in rows[header_idx + 1:]:
         if not r or len(r) < start_col:
             continue
