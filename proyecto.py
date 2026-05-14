@@ -17,6 +17,9 @@ if "ver_ele" not in st.session_state:
     st.session_state.ver_ele = False
 if "ver_instyctrl" not in st.session_state:
     st.session_state.ver_instyctrl = False
+if "ver_civ" not in st.session_state:
+    st.session_state.ver_civ = False
+
 st.markdown("""
 <style>
     .main-title { font-size: 26px; font-weight: bold; color: #1a3a5c; margin-bottom: 4px; }
@@ -147,6 +150,9 @@ def load_data():
     df_ele, date_headers_ele = leer_hoja_trabajadores(wb, 'ELE')
     # INSTYCTRL_______________________________________________________________________
     df_instyctrl, date_headers_instyctrl = leer_hoja_trabajadores(wb, 'IYC')
+    # CIV_______________________________________________________________________
+    df_civ, date_headers_civ = leer_hoja_trabajadores(wb, 'CIV')
+    
 
     return (
         anio,
@@ -159,12 +165,14 @@ def load_data():
         df_ele,
         date_headers_ele,
         df_instyctrl,
-        date_headers_instyctrl
+        date_headers_instyctrl,
+        df_civ,
+        date_headers_civ
     )
 # ── CARGA DE DATOS ────────────────────────────────────────────────────────────
 try:
     with st.spinner("Cargando datos desde Google Drive..."):
-        anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, data_headers_ele, df_instyctrl, data_headers_instyctrl = load_data()
+        anio, mes, fecha_act, df_resumen, totales, df_mec, date_headers, df_ele, data_headers_ele, df_instyctrl, data_headers_instyctrl,  df_civ, data_headers_civ = load_data()
 except Exception as e:
     st.error(f" No se pudo cargar el archivo desde Google Drive.\n\nVerifica que el archivo sea público.\n\nError: {e}")
     st.stop()
@@ -364,6 +372,46 @@ if st.session_state.ver_instyctrl:
 
     st.caption(f"Mostrando {len(df_instyctrl_fil)} de {len(df_instyctrl)} personas")
 
+    # ── TABLA CIV ─────────────────────────────────────────────────────────────────
+if st.session_state.ver_civ:
+
+    st.markdown('<div class="section-header"> Detalle de Horas Notificadas – Hoja civ (Departamento civ)</div>', unsafe_allow_html=True)
+
+    col_busq, col_cat = st.columns([2, 2])
+    with col_busq:
+        busqueda = st.text_input(" Buscar nombre o RPE", key="busqueda_civ")
+    with col_cat:
+        categorias = ['Todas'] + sorted(df_civ['Categoría'].dropna().unique().tolist())
+        cat_sel = st.selectbox("Filtrar por categoría", categorias, key="cat_civ")
+
+    df_civ_fil = df_civ.copy()
+
+    if busqueda:
+        df_civ_fil = df_civ_fil[
+            df_civ_fil['Nombre'].str.contains(busqueda, case=False, na=False) |
+            df_civ_fil['RPE'].astype(str).str.contains(busqueda, case=False, na=False)
+        ]
+
+    if cat_sel != 'Todas':
+        df_civ_fil = df_civ_fil[df_civ_fil['Categoría'] == cat_sel]
+
+    valid_dates = [d for d in data_headers_civ if d]
+    cols_show = ['Nombre', 'RPE', 'Categoría', 'Total_hrs'] + valid_dates
+    df_civ = df_civ_fil[[c for c in cols_show if c in df_civ_fil.columns]]
+
+    def color_total(val):
+        try:
+            v = float(val)
+            max_v = df_civ_fil['Total_hrs'].max() or 1
+            intensity = int(200 - (v / max_v) * 150)
+            return f'background-color: rgb({intensity}, {intensity+30}, 255); color: {"white" if intensity < 100 else "black"}'
+        except:
+            return ''
+
+    st.dataframe(df_civ_fil, use_container_width=True)
+
+    st.caption(f"Mostrando {len(df_civ_fil)} de {len(df_civ)} personas")
+
 
 
 
@@ -374,6 +422,8 @@ def activar_ele():
     st.session_state.ver_ele= not st.session_state.ver_ele  
 def activar_instyctrl():
     st.session_state.ver_instyctrl= not st.session_state.ver_instyctrl
+def activar_civ():
+    st.session_state.ver_civ= not st.session_state.ver_civ
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("C.C.C. Dos Bocas")
@@ -384,7 +434,7 @@ with st.sidebar:
     st.button ("MECANICO",on_click=activar_mec)
     st.button ("ELECTRICO",on_click=activar_ele)
     st.button ("INSTYCTRL", on_click=activar_instyctrl)
-    st.button ("CIVIL")
+    st.button ("CIVIL", on_click=activar_civ)
     st.markdown("---")
 
     if st.button(" Actualizar datos"):
