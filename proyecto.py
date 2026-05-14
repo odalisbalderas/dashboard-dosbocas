@@ -239,12 +239,9 @@ st.markdown('<div class="section-header"> Tabla Resumen – Hoja RESUMEN_OTS</di
 df_display = df_resumen[['Departamento', 'Disponible', 'Planificado', 'Notificado', 'Cumplimiento_pct']].copy()
 df_display.columns = ['Departamento', 'Disponible (Hrs)', 'Planificado (Hrs)', 'Notificado (Hrs)', 'Cumplimiento (%)']
 st.dataframe(
-    df_display.style
-        .format(...)
-        .map(color_total, subset=['Total_hrs']),
+    df_display,
     use_container_width=True,
     hide_index=True,
-    height=450,
 )
 
 # ── TABLA MEC ─────────────────────────────────────────────────────────────────
